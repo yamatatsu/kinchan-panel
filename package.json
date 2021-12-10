@@ -1,0 +1,15 @@
+{
+  "name": "kinchan-panel",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://github.com/yamatatsu/kinchan-panel.git",
+  "author": "yamatatsu <the.kinnikuman@gmail.com>",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "prettier": "^2.5.1"
+  }
+}
