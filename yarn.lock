@@ -9,10 +9,17 @@
   dependencies:
     "@aws-cdk/cloudformation-diff" "2.1.0"
 
-"@aws-cdk/aws-apigatewayv2-alpha@2.1.0-alpha.0":
+"@aws-cdk/aws-amplify-alpha@2.1.0-alpha.0":
   version "2.1.0-alpha.0"
-  resolved "https://registry.yarnpkg.com/@aws-cdk/aws-apigatewayv2-alpha/-/aws-apigatewayv2-alpha-2.1.0-alpha.0.tgz#4174bf891a9cfb084fb79d726c1e56f924ed3f9b"
-  integrity sha512-s+q6/KktH/fHOov4wb+GGqvr8ArxEDCcijLIRTefYOxNtEhTIdYSNoQ/xbQVtqb0vwDEh2BQme1Kb2GjtBhvMQ==
+  resolved "https://registry.yarnpkg.com/@aws-cdk/aws-amplify-alpha/-/aws-amplify-alpha-2.1.0-alpha.0.tgz#f11b5c7096176d4f09862c1a30bd9bb48b149be1"
+  integrity sha512-LDlfeMZ17Da6QZmyBxnJjQeocbyLr3N3R6TCKcJFfYtM8gaOhlO09f/Ty94y0FKEy2XOqv2sM8AlKoBEU1Fy8g==
+  dependencies:
+    yaml "1.10.2"
+
+"@aws-cdk/aws-appsync-alpha@2.1.0-alpha.0":
+  version "2.1.0-alpha.0"
+  resolved "https://registry.yarnpkg.com/@aws-cdk/aws-appsync-alpha/-/aws-appsync-alpha-2.1.0-alpha.0.tgz#d1be59a84f6c64813d01fa217cb953fcb51e5ff9"
+  integrity sha512-3dBZCIor7bpCd6vIm1+rrWP3siMbynhdPH2fJ/wX0fFSoxVZDNh5QOSgGqOqoKvJkSTvzET98tGxURt8eKsa+g==
 
 "@aws-cdk/cfnspec@2.1.0":
   version "2.1.0"
