@@ -1,5 +1,5 @@
 import { Construct } from "constructs";
-import { Stack, SecretValue } from "aws-cdk-lib";
+import { Stack, SecretValue, aws_codebuild } from "aws-cdk-lib";
 import * as amplify from "@aws-cdk/aws-amplify-alpha";
 
 export class AmplifyConstruct extends Construct {
@@ -14,6 +14,27 @@ export class AmplifyConstruct extends Construct {
         oauthToken: SecretValue.secretsManager("kinchan-panel-secrets", {
           jsonField: "github-access-token",
         }),
+      }),
+      basicAuth: amplify.BasicAuth.fromGeneratedPassword("tatsuyama"),
+      buildSpec: aws_codebuild.BuildSpec.fromObject({
+        version: "0.2",
+        frontend: {
+          phases: {
+            install: {
+              "runtime-versions": { nodejs: "14" },
+            },
+            pre_build: {
+              commands: ["yarn"],
+            },
+            build: {},
+            post_build: {},
+          },
+          reports: {},
+          artifacts: {
+            baseDirectory: "packages/static",
+            files: ["**/*"],
+          },
+        },
       }),
     });
     app.addBranch("main");
