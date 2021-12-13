@@ -10,36 +10,549 @@ Object {
     },
   },
   "Resources": Object {
-    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536": Object {
+    "amplifyapp2A08A956": Object {
+      "Properties": Object {
+        "BasicAuthConfig": Object {
+          "EnableBasicAuth": true,
+          "Password": Object {
+            "Fn::Join": Array [
+              "",
+              Array [
+                "{{resolve:secretsmanager:",
+                Object {
+                  "Ref": "amplifyappAppBasicAuth3EEA5A64",
+                },
+                ":SecretString:password::}}",
+              ],
+            ],
+          },
+          "Username": "tatsuyama",
+        },
+        "BuildSpec": "{
+  \\"version\\": \\"0.2\\",
+  \\"frontend\\": {
+    \\"phases\\": {
+      \\"install\\": {
+        \\"runtime-versions\\": {
+          \\"nodejs\\": \\"14\\"
+        }
+      },
+      \\"pre_build\\": {
+        \\"commands\\": [
+          \\"yarn\\"
+        ]
+      },
+      \\"build\\": {},
+      \\"post_build\\": {}
+    },
+    \\"reports\\": {},
+    \\"artifacts\\": {
+      \\"baseDirectory\\": \\"packages/static\\",
+      \\"files\\": [
+        \\"**/*\\"
+      ]
+    }
+  }
+}",
+        "IAMServiceRole": Object {
+          "Fn::GetAtt": Array [
+            "amplifyappRoleC4243D57",
+            "Arn",
+          ],
+        },
+        "Name": "Target",
+        "OauthToken": "{{resolve:secretsmanager:kinchan-panel-secrets:SecretString:github-access-token::}}",
+        "Repository": "https://github.com/yamatatsu/kinchan-panel",
+      },
+      "Type": "AWS::Amplify::App",
+    },
+    "amplifyappAppBasicAuth3EEA5A64": Object {
+      "DeletionPolicy": "Delete",
+      "Properties": Object {
+        "GenerateSecretString": Object {
+          "GenerateStringKey": "password",
+          "SecretStringTemplate": "{\\"username\\":\\"tatsuyama\\"}",
+        },
+      },
+      "Type": "AWS::SecretsManager::Secret",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "amplifyappRoleC4243D57": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": "amplify.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "amplifyappmain86A66E46": Object {
+      "Properties": Object {
+        "AppId": Object {
+          "Fn::GetAtt": Array [
+            "amplifyapp2A08A956",
+            "AppId",
+          ],
+        },
+        "BranchName": "main",
+        "EnableAutoBuild": true,
+        "EnablePullRequestPreview": true,
+      },
+      "Type": "AWS::Amplify::Branch",
+    },
+    "appsyncapiDB228752": Object {
+      "Properties": Object {
+        "AuthenticationType": "API_KEY",
+        "Name": "kinchan-panel",
+      },
+      "Type": "AWS::AppSync::GraphQLApi",
+    },
+    "appsyncapiDefaultApiKey1169F5F9": Object {
       "DependsOn": Array [
-        "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF",
-        "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265",
+        "appsyncapiSchema86AA2CD4",
       ],
       "Properties": Object {
+        "ApiId": Object {
+          "Fn::GetAtt": Array [
+            "appsyncapiDB228752",
+            "ApiId",
+          ],
+        },
+      },
+      "Type": "AWS::AppSync::ApiKey",
+    },
+    "appsyncapiMutationcreateRoomResolver1E823012": Object {
+      "DependsOn": Array [
+        "appsyncapiroomCreationDSD09B016B",
+        "appsyncapiSchema86AA2CD4",
+      ],
+      "Properties": Object {
+        "ApiId": Object {
+          "Fn::GetAtt": Array [
+            "appsyncapiDB228752",
+            "ApiId",
+          ],
+        },
+        "DataSourceName": "roomCreationDS",
+        "FieldName": "createRoom",
+        "Kind": "UNIT",
+        "RequestMappingTemplate": "{\\"version\\": \\"2017-02-28\\", \\"operation\\": \\"Invoke\\", \\"payload\\": $util.toJson($ctx)}",
+        "ResponseMappingTemplate": "$util.toJson($ctx.result)",
+        "TypeName": "Mutation",
+      },
+      "Type": "AWS::AppSync::Resolver",
+    },
+    "appsyncapiQueryroomResolver1F6BBD39": Object {
+      "DependsOn": Array [
+        "appsyncapiroomDS7DF4F6A8",
+        "appsyncapiSchema86AA2CD4",
+      ],
+      "Properties": Object {
+        "ApiId": Object {
+          "Fn::GetAtt": Array [
+            "appsyncapiDB228752",
+            "ApiId",
+          ],
+        },
+        "DataSourceName": "roomDS",
+        "FieldName": "room",
+        "Kind": "UNIT",
+        "RequestMappingTemplate": "{\\"version\\": \\"2017-02-28\\", \\"operation\\": \\"GetItem\\", \\"key\\": {\\"roomId\\": $util.dynamodb.toDynamoDBJson($ctx.args.roomId)}}",
+        "ResponseMappingTemplate": "$util.toJson($ctx.result)",
+        "TypeName": "Query",
+      },
+      "Type": "AWS::AppSync::Resolver",
+    },
+    "appsyncapiRoomjudgesResolver8E6EFA95": Object {
+      "DependsOn": Array [
+        "appsyncapijudgeDS04B5E288",
+        "appsyncapiSchema86AA2CD4",
+      ],
+      "Properties": Object {
+        "ApiId": Object {
+          "Fn::GetAtt": Array [
+            "appsyncapiDB228752",
+            "ApiId",
+          ],
+        },
+        "DataSourceName": "judgeDS",
+        "FieldName": "judges",
+        "Kind": "UNIT",
+        "RequestMappingTemplate": "{\\"version\\" : \\"2017-02-28\\", \\"operation\\" : \\"Query\\", \\"query\\" : {
+            \\"expression\\" : \\"#roomId = :roomId\\",
+            \\"expressionNames\\" : {
+                \\"#roomId\\" : \\"roomId\\"
+            },
+            \\"expressionValues\\" : {
+                \\":roomId\\" : $util.dynamodb.toDynamoDBJson($ctx.source.roomId)
+            }
+        }}",
+        "ResponseMappingTemplate": "$util.toJson($ctx.result.items)",
+        "TypeName": "Room",
+      },
+      "Type": "AWS::AppSync::Resolver",
+    },
+    "appsyncapiSchema86AA2CD4": Object {
+      "Properties": Object {
+        "ApiId": Object {
+          "Fn::GetAtt": Array [
+            "appsyncapiDB228752",
+            "ApiId",
+          ],
+        },
+        "Definition": "schema {
+  query: Query
+  mutation: Mutation
+}
+interface Node {
+  createdAt: AWSTimestamp!
+  editedAt: AWSTimestamp!
+}
+type Judge implements Node {
+  roomId: ID!
+  judgeId: ID!
+  point: Int!
+  createdAt: AWSTimestamp!
+  editedAt: AWSTimestamp!
+}
+type Room implements Node {
+  roomId: ID!
+  name: String!
+  judges: [Judge]!
+  createdAt: AWSTimestamp!
+  editedAt: AWSTimestamp!
+}
+type Query {
+  room(roomId: ID!): Room
+}
+type Mutation {
+  createRoom: Room
+}
+",
+      },
+      "Type": "AWS::AppSync::GraphQLSchema",
+    },
+    "appsyncapijudgeDS04B5E288": Object {
+      "Properties": Object {
+        "ApiId": Object {
+          "Fn::GetAtt": Array [
+            "appsyncapiDB228752",
+            "ApiId",
+          ],
+        },
+        "DynamoDBConfig": Object {
+          "AwsRegion": Object {
+            "Ref": "AWS::Region",
+          },
+          "TableName": Object {
+            "Ref": "appsyncjudgeTable80E2189E",
+          },
+        },
+        "Name": "judgeDS",
+        "ServiceRoleArn": Object {
+          "Fn::GetAtt": Array [
+            "appsyncapijudgeDSServiceRoleF47DFFE1",
+            "Arn",
+          ],
+        },
+        "Type": "AMAZON_DYNAMODB",
+      },
+      "Type": "AWS::AppSync::DataSource",
+    },
+    "appsyncapijudgeDSServiceRoleDefaultPolicyAFA67EE5": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": Array [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+              ],
+              "Effect": "Allow",
+              "Resource": Array [
+                Object {
+                  "Fn::GetAtt": Array [
+                    "appsyncjudgeTable80E2189E",
+                    "Arn",
+                  ],
+                },
+                Object {
+                  "Ref": "AWS::NoValue",
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "appsyncapijudgeDSServiceRoleDefaultPolicyAFA67EE5",
+        "Roles": Array [
+          Object {
+            "Ref": "appsyncapijudgeDSServiceRoleF47DFFE1",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "appsyncapijudgeDSServiceRoleF47DFFE1": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": "appsync.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "appsyncapiroomCreationDSD09B016B": Object {
+      "Properties": Object {
+        "ApiId": Object {
+          "Fn::GetAtt": Array [
+            "appsyncapiDB228752",
+            "ApiId",
+          ],
+        },
+        "LambdaConfig": Object {
+          "LambdaFunctionArn": Object {
+            "Fn::GetAtt": Array [
+              "appsyncroomCreationHandler5FDF368E",
+              "Arn",
+            ],
+          },
+        },
+        "Name": "roomCreationDS",
+        "ServiceRoleArn": Object {
+          "Fn::GetAtt": Array [
+            "appsyncapiroomCreationDSServiceRole9FD23DE9",
+            "Arn",
+          ],
+        },
+        "Type": "AWS_LAMBDA",
+      },
+      "Type": "AWS::AppSync::DataSource",
+    },
+    "appsyncapiroomCreationDSServiceRole9FD23DE9": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": "appsync.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "appsyncapiroomCreationDSServiceRoleDefaultPolicy69B4B9DF": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "lambda:InvokeFunction",
+              "Effect": "Allow",
+              "Resource": Object {
+                "Fn::GetAtt": Array [
+                  "appsyncroomCreationHandler5FDF368E",
+                  "Arn",
+                ],
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "appsyncapiroomCreationDSServiceRoleDefaultPolicy69B4B9DF",
+        "Roles": Array [
+          Object {
+            "Ref": "appsyncapiroomCreationDSServiceRole9FD23DE9",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "appsyncapiroomDS7DF4F6A8": Object {
+      "Properties": Object {
+        "ApiId": Object {
+          "Fn::GetAtt": Array [
+            "appsyncapiDB228752",
+            "ApiId",
+          ],
+        },
+        "DynamoDBConfig": Object {
+          "AwsRegion": Object {
+            "Ref": "AWS::Region",
+          },
+          "TableName": Object {
+            "Ref": "appsyncroomTable500C128D",
+          },
+        },
+        "Name": "roomDS",
+        "ServiceRoleArn": Object {
+          "Fn::GetAtt": Array [
+            "appsyncapiroomDSServiceRole50458C83",
+            "Arn",
+          ],
+        },
+        "Type": "AMAZON_DYNAMODB",
+      },
+      "Type": "AWS::AppSync::DataSource",
+    },
+    "appsyncapiroomDSServiceRole50458C83": Object {
+      "Properties": Object {
+        "AssumeRolePolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": Object {
+                "Service": "appsync.amazonaws.com",
+              },
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+      },
+      "Type": "AWS::IAM::Role",
+    },
+    "appsyncapiroomDSServiceRoleDefaultPolicyD1A10FD6": Object {
+      "Properties": Object {
+        "PolicyDocument": Object {
+          "Statement": Array [
+            Object {
+              "Action": Array [
+                "dynamodb:BatchGetItem",
+                "dynamodb:GetRecords",
+                "dynamodb:GetShardIterator",
+                "dynamodb:Query",
+                "dynamodb:GetItem",
+                "dynamodb:Scan",
+                "dynamodb:ConditionCheckItem",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+              ],
+              "Effect": "Allow",
+              "Resource": Array [
+                Object {
+                  "Fn::GetAtt": Array [
+                    "appsyncroomTable500C128D",
+                    "Arn",
+                  ],
+                },
+                Object {
+                  "Ref": "AWS::NoValue",
+                },
+              ],
+            },
+          ],
+          "Version": "2012-10-17",
+        },
+        "PolicyName": "appsyncapiroomDSServiceRoleDefaultPolicyD1A10FD6",
+        "Roles": Array [
+          Object {
+            "Ref": "appsyncapiroomDSServiceRole50458C83",
+          },
+        ],
+      },
+      "Type": "AWS::IAM::Policy",
+    },
+    "appsyncjudgeTable80E2189E": Object {
+      "DeletionPolicy": "Delete",
+      "Properties": Object {
+        "AttributeDefinitions": Array [
+          Object {
+            "AttributeName": "roomId",
+            "AttributeType": "S",
+          },
+          Object {
+            "AttributeName": "judgeId",
+            "AttributeType": "S",
+          },
+        ],
+        "KeySchema": Array [
+          Object {
+            "AttributeName": "roomId",
+            "KeyType": "HASH",
+          },
+          Object {
+            "AttributeName": "judgeId",
+            "KeyType": "RANGE",
+          },
+        ],
+        "ProvisionedThroughput": Object {
+          "ReadCapacityUnits": 5,
+          "WriteCapacityUnits": 5,
+        },
+      },
+      "Type": "AWS::DynamoDB::Table",
+      "UpdateReplacePolicy": "Delete",
+    },
+    "appsyncroomCreationHandler5FDF368E": Object {
+      "DependsOn": Array [
+        "appsyncroomCreationHandlerServiceRoleDefaultPolicy5DD1082A",
+        "appsyncroomCreationHandlerServiceRole6B980FE0",
+      ],
+      "Properties": Object {
+        "Architectures": Array [
+          "arm64",
+        ],
         "Code": Object {
           "S3Bucket": Object {
             "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
           },
-          "S3Key": "983c442a2fe823a8b4ebb18d241a5150ae15103dacbf3f038c7c6343e565aa4c.zip",
+          "S3Key": "ffbf57d30b460965d73b74aca11b8e6f7712e3f77ffbe29a9bd9aa96afe4c744.zip",
+        },
+        "Environment": Object {
+          "Variables": Object {
+            "AWS_NODEJS_CONNECTION_REUSE_ENABLED": "1",
+            "JUDGE_TABLE_NAME": Object {
+              "Ref": "appsyncjudgeTable80E2189E",
+            },
+            "ROOM_TABLE_NAME": Object {
+              "Ref": "appsyncroomTable500C128D",
+            },
+          },
         },
         "Handler": "index.handler",
-        "Layers": Array [
-          Object {
-            "Ref": "websitedeployAwsCliLayer116DC85E",
-          },
-        ],
         "Role": Object {
           "Fn::GetAtt": Array [
-            "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265",
+            "appsyncroomCreationHandlerServiceRole6B980FE0",
             "Arn",
           ],
         },
-        "Runtime": "python3.7",
-        "Timeout": 900,
+        "Runtime": "nodejs14.x",
       },
       "Type": "AWS::Lambda::Function",
     },
-    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265": Object {
+    "appsyncroomCreationHandlerServiceRole6B980FE0": Object {
       "Properties": Object {
         "AssumeRolePolicyDocument": Object {
           "Statement": Array [
@@ -70,293 +583,84 @@ Object {
       },
       "Type": "AWS::IAM::Role",
     },
-    "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF": Object {
+    "appsyncroomCreationHandlerServiceRoleDefaultPolicy5DD1082A": Object {
       "Properties": Object {
         "PolicyDocument": Object {
           "Statement": Array [
             Object {
               "Action": Array [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Resource": Array [
-                Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      "arn:",
-                      Object {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      Object {
-                        "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
-                      },
-                    ],
-                  ],
-                },
-                Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      "arn:",
-                      Object {
-                        "Ref": "AWS::Partition",
-                      },
-                      ":s3:::",
-                      Object {
-                        "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-            Object {
-              "Action": Array [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-                "s3:DeleteObject*",
-                "s3:PutObject",
-                "s3:Abort*",
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
               ],
               "Effect": "Allow",
               "Resource": Array [
                 Object {
                   "Fn::GetAtt": Array [
-                    "websitebucketCCBCB545",
+                    "appsyncroomTable500C128D",
                     "Arn",
                   ],
                 },
                 Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      Object {
-                        "Fn::GetAtt": Array [
-                          "websitebucketCCBCB545",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
+                  "Ref": "AWS::NoValue",
+                },
+              ],
+            },
+            Object {
+              "Action": Array [
+                "dynamodb:BatchWriteItem",
+                "dynamodb:PutItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:DeleteItem",
+              ],
+              "Effect": "Allow",
+              "Resource": Array [
+                Object {
+                  "Fn::GetAtt": Array [
+                    "appsyncjudgeTable80E2189E",
+                    "Arn",
                   ],
+                },
+                Object {
+                  "Ref": "AWS::NoValue",
                 },
               ],
             },
           ],
           "Version": "2012-10-17",
         },
-        "PolicyName": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRoleDefaultPolicy88902FDF",
+        "PolicyName": "appsyncroomCreationHandlerServiceRoleDefaultPolicy5DD1082A",
         "Roles": Array [
           Object {
-            "Ref": "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756CServiceRole89A01265",
+            "Ref": "appsyncroomCreationHandlerServiceRole6B980FE0",
           },
         ],
       },
       "Type": "AWS::IAM::Policy",
     },
-    "websitebucketCCBCB545": Object {
+    "appsyncroomTable500C128D": Object {
       "DeletionPolicy": "Delete",
       "Properties": Object {
-        "Tags": Array [
+        "AttributeDefinitions": Array [
           Object {
-            "Key": "aws-cdk:cr-owned:86bb1c76",
-            "Value": "true",
+            "AttributeName": "roomId",
+            "AttributeType": "S",
           },
         ],
-      },
-      "Type": "AWS::S3::Bucket",
-      "UpdateReplacePolicy": "Delete",
-    },
-    "websitebucketPolicy62483E56": Object {
-      "Properties": Object {
-        "Bucket": Object {
-          "Ref": "websitebucketCCBCB545",
-        },
-        "PolicyDocument": Object {
-          "Statement": Array [
-            Object {
-              "Action": Array [
-                "s3:GetObject*",
-                "s3:GetBucket*",
-                "s3:List*",
-              ],
-              "Effect": "Allow",
-              "Principal": Object {
-                "CanonicalUser": Object {
-                  "Fn::GetAtt": Array [
-                    "websiteoai47BFA5C7",
-                    "S3CanonicalUserId",
-                  ],
-                },
-              },
-              "Resource": Array [
-                Object {
-                  "Fn::GetAtt": Array [
-                    "websitebucketCCBCB545",
-                    "Arn",
-                  ],
-                },
-                Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      Object {
-                        "Fn::GetAtt": Array [
-                          "websitebucketCCBCB545",
-                          "Arn",
-                        ],
-                      },
-                      "/*",
-                    ],
-                  ],
-                },
-              ],
-            },
-            Object {
-              "Action": "s3:GetObject",
-              "Effect": "Allow",
-              "Principal": Object {
-                "CanonicalUser": Object {
-                  "Fn::GetAtt": Array [
-                    "websiteoai47BFA5C7",
-                    "S3CanonicalUserId",
-                  ],
-                },
-              },
-              "Resource": Object {
-                "Fn::Join": Array [
-                  "",
-                  Array [
-                    Object {
-                      "Fn::GetAtt": Array [
-                        "websitebucketCCBCB545",
-                        "Arn",
-                      ],
-                    },
-                    "/*",
-                  ],
-                ],
-              },
-            },
-          ],
-          "Version": "2012-10-17",
-        },
-      },
-      "Type": "AWS::S3::BucketPolicy",
-    },
-    "websitedeployAwsCliLayer116DC85E": Object {
-      "Properties": Object {
-        "Content": Object {
-          "S3Bucket": Object {
-            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
-          },
-          "S3Key": "e9882ab123687399f934da0d45effe675ecc8ce13b40cb946f3e1d6141fe8d68.zip",
-        },
-        "Description": "/opt/awscli/aws",
-      },
-      "Type": "AWS::Lambda::LayerVersion",
-    },
-    "websitedeployCustomResource86BA6893": Object {
-      "DeletionPolicy": "Delete",
-      "Properties": Object {
-        "DestinationBucketName": Object {
-          "Ref": "websitebucketCCBCB545",
-        },
-        "Prune": true,
-        "ServiceToken": Object {
-          "Fn::GetAtt": Array [
-            "CustomCDKBucketDeployment8693BB64968944B69AAFB0CC9EB8756C81C01536",
-            "Arn",
-          ],
-        },
-        "SourceBucketNames": Array [
+        "KeySchema": Array [
           Object {
-            "Fn::Sub": "cdk-hnb659fds-assets-\${AWS::AccountId}-\${AWS::Region}",
+            "AttributeName": "roomId",
+            "KeyType": "HASH",
           },
         ],
-        "SourceObjectKeys": Array [
-          "0ab25797eac2d57adc69b02448a357576381c70ba8ad2e203965d12a7a6811d8.zip",
-        ],
+        "ProvisionedThroughput": Object {
+          "ReadCapacityUnits": 5,
+          "WriteCapacityUnits": 5,
+        },
       },
-      "Type": "Custom::CDKBucketDeployment",
+      "Type": "AWS::DynamoDB::Table",
       "UpdateReplacePolicy": "Delete",
-    },
-    "websitedistributionCFDistributionAB8201DE": Object {
-      "Properties": Object {
-        "DistributionConfig": Object {
-          "DefaultCacheBehavior": Object {
-            "AllowedMethods": Array [
-              "GET",
-              "HEAD",
-            ],
-            "CachedMethods": Array [
-              "GET",
-              "HEAD",
-            ],
-            "Compress": true,
-            "DefaultTTL": 0,
-            "ForwardedValues": Object {
-              "Cookies": Object {
-                "Forward": "none",
-              },
-              "QueryString": false,
-            },
-            "MaxTTL": 0,
-            "MinTTL": 0,
-            "TargetOriginId": "origin1",
-            "ViewerProtocolPolicy": "redirect-to-https",
-          },
-          "DefaultRootObject": "index.html",
-          "Enabled": true,
-          "HttpVersion": "http2",
-          "IPV6Enabled": true,
-          "Origins": Array [
-            Object {
-              "ConnectionAttempts": 3,
-              "ConnectionTimeout": 10,
-              "DomainName": Object {
-                "Fn::GetAtt": Array [
-                  "websitebucketCCBCB545",
-                  "RegionalDomainName",
-                ],
-              },
-              "Id": "origin1",
-              "S3OriginConfig": Object {
-                "OriginAccessIdentity": Object {
-                  "Fn::Join": Array [
-                    "",
-                    Array [
-                      "origin-access-identity/cloudfront/",
-                      Object {
-                        "Ref": "websiteoai47BFA5C7",
-                      },
-                    ],
-                  ],
-                },
-              },
-            },
-          ],
-          "PriceClass": "PriceClass_200",
-          "ViewerCertificate": Object {
-            "CloudFrontDefaultCertificate": true,
-          },
-        },
-      },
-      "Type": "AWS::CloudFront::Distribution",
-    },
-    "websiteoai47BFA5C7": Object {
-      "Properties": Object {
-        "CloudFrontOriginAccessIdentityConfig": Object {
-          "Comment": "Allows CloudFront to reach the bucket",
-        },
-      },
-      "Type": "AWS::CloudFront::CloudFrontOriginAccessIdentity",
     },
   },
   "Rules": Object {

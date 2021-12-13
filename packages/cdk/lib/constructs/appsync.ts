@@ -1,6 +1,11 @@
 import { Construct } from "constructs";
 import * as appsync from "@aws-cdk/aws-appsync-alpha";
-import { aws_dynamodb, RemovalPolicy } from "aws-cdk-lib";
+import {
+  aws_dynamodb,
+  aws_lambda,
+  aws_lambda_nodejs,
+  RemovalPolicy,
+} from "aws-cdk-lib";
 
 export class AppSyncConstruct extends Construct {
   private readonly api: appsync.GraphqlApi;
@@ -12,7 +17,7 @@ export class AppSyncConstruct extends Construct {
       name: "kinchan-panel",
     });
 
-    const { roomDS, judgeDS } = this.createDSs();
+    const { roomDS, judgeDS, roomCreationDS } = this.createDSs();
     const { room, judge } = this.createTypes();
 
     this.api.addQuery(
@@ -43,6 +48,16 @@ export class AppSyncConstruct extends Construct {
       ),
       responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultList(),
     });
+
+    this.api.addMutation(
+      "createRoom",
+      new appsync.ResolvableField({
+        returnType: room.attribute(),
+        dataSource: roomCreationDS,
+        requestMappingTemplate: appsync.MappingTemplate.lambdaRequest(),
+        responseMappingTemplate: appsync.MappingTemplate.lambdaResult(),
+      })
+    );
   }
 
   private createDSs() {
@@ -66,9 +81,29 @@ export class AppSyncConstruct extends Construct {
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
+    const roomCreationHandler = new aws_lambda_nodejs.NodejsFunction(
+      this,
+      "roomCreationHandler",
+      {
+        entry: `${__dirname}/../../../functions/src/roomCreationHandler.ts`,
+        runtime: aws_lambda.Runtime.NODEJS_14_X,
+        environment: {
+          ROOM_TABLE_NAME: roomTable.tableName,
+          JUDGE_TABLE_NAME: judgeTable.tableName,
+        },
+        architecture: aws_lambda.Architecture.ARM_64,
+      }
+    );
+    roomTable.grantWriteData(roomCreationHandler);
+    judgeTable.grantWriteData(roomCreationHandler);
+
     const roomDS = this.api.addDynamoDbDataSource("roomDS", roomTable);
     const judgeDS = this.api.addDynamoDbDataSource("judgeDS", judgeTable);
-    return { roomDS, judgeDS };
+    const roomCreationDS = this.api.addLambdaDataSource(
+      "roomCreationDS",
+      roomCreationHandler
+    );
+    return { roomDS, judgeDS, roomCreationDS };
   }
 
   private createTypes() {
