@@ -27,7 +27,7 @@ export class AmplifyConstruct extends Construct {
               commands: ["yarn"],
             },
             build: {
-              commands: ["cd packages/webpage", "yarn build"],
+              commands: ["yarn build"],
             },
             post_build: {},
           },

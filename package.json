@@ -9,6 +9,9 @@
   "workspaces": [
     "packages/*"
   ],
+  "scripts": {
+    "build": "cd packages/webpage ; yarn build"
+  },
   "devDependencies": {
     "prettier": "^2.5.1"
   }
