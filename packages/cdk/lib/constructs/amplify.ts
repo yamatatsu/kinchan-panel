@@ -26,12 +26,14 @@ export class AmplifyConstruct extends Construct {
             pre_build: {
               commands: ["yarn"],
             },
-            build: {},
+            build: {
+              commands: ["cd packages/webpage", "yarn build"],
+            },
             post_build: {},
           },
           reports: {},
           artifacts: {
-            baseDirectory: "packages/static",
+            baseDirectory: "packages/webpage/dist",
             files: ["**/*"],
           },
         },

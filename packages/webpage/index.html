@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>欽ちゃんの仮装大賞パネル 再現アプリ</title>
+    <meta name="theme-color" content="#157878" />
+    <meta
+      name="apple-mobile-web-app-status-bar-style"
+      content="black-translucent"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.5/css/bulma.min.css"
+    />
+    <style>
+      html {
+        touch-action: manipulation;
+      }
+
+      .is-center {
+        text-align: center;
+      }
+
+      .is-vertical-center {
+        display: flex;
+        align-items: center;
+      }
+
+      .canvas-wrapper {
+        position: relative;
+        width: 160px;
+        height: 720px;
+        margin: auto;
+      }
+
+      .canvas-wrapper canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+      }
+
+      .is-hide {
+        display: none;
+      }
+    </style>
+    <script
+      defer
+      src="https://use.fontawesome.com/releases/v5.3.1/js/all.js"
+    ></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
