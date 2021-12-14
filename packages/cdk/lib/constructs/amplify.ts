@@ -20,16 +20,22 @@ export class AmplifyConstruct extends Construct {
         version: "0.2",
         frontend: {
           phases: {
-            install: {
-              "runtime-versions": { nodejs: "14" },
-            },
-            pre_build: {
-              commands: ["yarn"],
+            // install: {
+            //   "runtime-versions": { nodejs: "14" },
+            // },
+            preBuild: {
+              commands: [
+                "node -v",
+                "nvm install 14",
+                "nvm use 14",
+                "node -v",
+                "yarn",
+              ],
             },
             build: {
               commands: ["yarn build"],
             },
-            post_build: {},
+            postBuild: {},
           },
           reports: {},
           artifacts: {
