@@ -19,9 +19,9 @@ API.configure({
   //   // OPTIONAL - Amazon Cognito Web Client ID (26-char alphanumeric string)
   //   userPoolWebClientId: process.env.REACT_APP_CLIENT_ID,
   // },
-  aws_appsync_region: process.env.APPSYNC_REGION,
-  aws_appsync_graphqlEndpoint: process.env.APPSYNC_GRAPHQL_ENDPOINT,
-  aws_appsync_authenticationType: process.env.APPSYNC_AUTHENTICATION_TYPE,
+  aws_appsync_region: import.meta.env.APPSYNC_REGION,
+  aws_appsync_graphqlEndpoint: import.meta.env.APPSYNC_GRAPHQL_ENDPOINT,
+  aws_appsync_authenticationType: import.meta.env.APPSYNC_AUTHENTICATION_TYPE,
 });
 
 export default function App() {
