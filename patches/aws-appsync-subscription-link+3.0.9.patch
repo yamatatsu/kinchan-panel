@@ -1,0 +1,49 @@
+diff --git a/node_modules/aws-appsync-subscription-link/lib/subscription-handshake-link.d.ts b/node_modules/aws-appsync-subscription-link/lib/subscription-handshake-link.d.ts
+index 4bbf02f..4230fa0 100644
+--- a/node_modules/aws-appsync-subscription-link/lib/subscription-handshake-link.d.ts
++++ b/node_modules/aws-appsync-subscription-link/lib/subscription-handshake-link.d.ts
+@@ -2,7 +2,7 @@
+  * Copyright 2017-2018 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+  * SPDX-License-Identifier: Apache-2.0
+  */
+-import { ApolloLink, Observable, Operation, FetchResult } from "@apollo/client/core";
++import { ApolloLink, Observer, Operation, FetchResult } from "@apollo/client/core";
+ declare type MqttConnectionInfo = {
+     client: string;
+     url: string;
+@@ -14,11 +14,11 @@ export declare class SubscriptionHandshakeLink extends ApolloLink {
+     private topicObservers;
+     private clientObservers;
+     constructor(subsInfoContextKey: any);
+-    request(operation: Operation): Observable<unknown>;
+-    connectNewClients(connectionInfo: MqttConnectionInfo[], observer: ZenObservable.Observer<FetchResult>, operation: Operation): Promise<any[]>;
+-    connectNewClient(connectionInfo: MqttConnectionInfo, observer: ZenObservable.Observer<FetchResult>, selectionNames: string[]): Promise<any>;
+-    subscribeToTopics<T>(client: any, topics: string[], observer: ZenObservable.Observer<T>): Promise<unknown[]>;
+-    subscribeToTopic<T>(client: any, topic: string, observer: ZenObservable.Observer<T>): Promise<unknown>;
++    // request(operation: Operation): Observable<unknown>;
++    connectNewClients(connectionInfo: MqttConnectionInfo[], observer: Observer<FetchResult>, operation: Operation): Promise<any[]>;
++    connectNewClient(connectionInfo: MqttConnectionInfo, observer: Observer<FetchResult>, selectionNames: string[]): Promise<any>;
++    subscribeToTopics<T>(client: any, topics: string[], observer: Observer<T>): Promise<unknown[]>;
++    subscribeToTopic<T>(client: any, topic: string, observer: Observer<T>): Promise<unknown>;
+     onMessage: (topic: string, message: string, selectionNames: string[]) => void;
+ }
+ export {};
+diff --git a/node_modules/aws-appsync-subscription-link/lib/types/index.d.ts b/node_modules/aws-appsync-subscription-link/lib/types/index.d.ts
+index 9ee49bc..ac3e0fe 100644
+--- a/node_modules/aws-appsync-subscription-link/lib/types/index.d.ts
++++ b/node_modules/aws-appsync-subscription-link/lib/types/index.d.ts
+@@ -1,4 +1,5 @@
+ import { AuthOptions } from "aws-appsync-auth-link";
++import { Observer } from "@apollo/client/core";
+ export declare enum SUBSCRIPTION_STATUS {
+     PENDING = 0,
+     CONNECTED = 1,
+@@ -72,7 +73,7 @@ export declare type UrlInfo = {
+     region: string;
+ };
+ export declare type ObserverQuery = {
+-    observer: ZenObservable.SubscriptionObserver<any>;
++    observer: Observer<any>;
+     query: string;
+     variables: object;
+     subscriptionState: SUBSCRIPTION_STATUS;

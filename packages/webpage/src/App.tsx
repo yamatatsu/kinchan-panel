@@ -1,14 +1,15 @@
 import { useEffect, useReducer, useState } from "react";
 import gql from "graphql-tag";
-import AWSAppSyncClient, { AUTH_TYPE } from "aws-appsync";
+import { AUTH_TYPE } from "aws-appsync-auth-link";
 import * as mutations from "./graphql/mutations";
 import * as subscriptions from "./graphql/subscriptions";
+import { createClient } from "./apolloClient";
 import { imgs, se } from "./constants";
 import { Sound } from "./models/sound";
 import { Panel } from "./models/panel";
 import View from "./View";
 
-const client = new AWSAppSyncClient({
+const client = createClient({
   url: import.meta.env.VITE_APPSYNC_GRAPHQL_ENDPOINT,
   region: import.meta.env.VITE_APPSYNC_REGION,
   auth: {
