@@ -10,9 +10,11 @@
     "packages/*"
   ],
   "scripts": {
+    "postinstall": "patch-package",
     "build": "cd packages/webpage ; yarn build"
   },
   "devDependencies": {
+    "patch-package": "^6.4.7",
     "prettier": "^2.5.1"
   }
 }

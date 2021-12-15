@@ -1,0 +1,16 @@
+projects:
+  kinchan-panel:
+    schemaPath: src/graphql/schema.json
+    includes:
+      - src/graphql/**/*.ts
+    extensions:
+      amplify:
+        codeGenTarget: typescript
+        # generatedFileName: src/API.ts
+        docsFilePath: src/graphql
+        region: ap-northeast-1
+        apiId: wyg52eqev5bb7blicn6n5gyeyi
+        maxDepth: 3
+extensions:
+  amplify:
+    version: 3

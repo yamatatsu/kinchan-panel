@@ -1,0 +1,30 @@
+schema {
+  query: Query
+  mutation: Mutation
+  subscription: Subscription
+}
+
+type Judge {
+  judgeId: ID!
+  roomId: ID!
+}
+
+type Mutation {
+  createRoom(name: String!, roomId: ID!): Room
+  incPoint(roomId: ID!): Room
+  resetPoint(roomId: ID!): Room
+}
+
+type Query {
+  room(roomId: ID!): Room
+}
+
+type Room {
+  name: String!
+  point: Int!
+  roomId: ID!
+}
+
+type Subscription {
+  roomUpdated(roomId: ID!): Room @aws_subscribe(mutations : ["incPoint"])
+}

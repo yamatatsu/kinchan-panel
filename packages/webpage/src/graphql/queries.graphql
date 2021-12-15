@@ -1,0 +1,8 @@
+# this is an auto generated file. This will be overwritten
+query Room($roomId: ID!) {
+  room(roomId: $roomId) {
+    roomId
+    name
+    point
+  }
+}
