@@ -1,11 +1,6 @@
 import { Construct } from "constructs";
 import * as appsync from "@aws-cdk/aws-appsync-alpha";
-import {
-  aws_dynamodb,
-  aws_lambda,
-  aws_lambda_nodejs,
-  RemovalPolicy,
-} from "aws-cdk-lib";
+import { aws_dynamodb, RemovalPolicy } from "aws-cdk-lib";
 
 export class AppSyncConstruct extends Construct {
   private readonly api: appsync.GraphqlApi;
@@ -17,8 +12,8 @@ export class AppSyncConstruct extends Construct {
       name: "kinchan-panel",
     });
 
-    const { roomDS, judgeDS } = this.createDSs();
-    const { room, judge } = this.createTypes();
+    const { roomDS } = this.createDSs();
+    const { room } = this.createTypes();
 
     this.api.addQuery(
       "room",
@@ -35,29 +30,6 @@ export class AppSyncConstruct extends Construct {
         responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultItem(),
       })
     );
-
-    // const query = appsync.KeyCondition.eq("roomId", "roomId")
-    //   .renderTemplate()
-    //   .replace("$ctx.args.", "$ctx.source.");
-    // this.api.createResolver({
-    //   typeName: "Room",
-    //   fieldName: "judges",
-    //   dataSource: judgeDS,
-    //   requestMappingTemplate: appsync.MappingTemplate.fromString(
-    //     `{"version" : "2017-02-28", "operation" : "Query", ${query}}`
-    //   ),
-    //   responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultList(),
-    // });
-
-    // this.api.addMutation(
-    //   "createRoom",
-    //   new appsync.ResolvableField({
-    //     returnType: room.attribute(),
-    //     dataSource: roomCreationDS,
-    //     requestMappingTemplate: appsync.MappingTemplate.lambdaRequest(),
-    //     responseMappingTemplate: appsync.MappingTemplate.lambdaResult(),
-    //   })
-    // );
 
     this.api.addMutation(
       "createRoom",
@@ -115,6 +87,34 @@ export class AppSyncConstruct extends Construct {
       })
     );
 
+    this.api.addMutation(
+      "resetPoint",
+      new appsync.ResolvableField({
+        returnType: room.attribute(),
+        dataSource: roomDS,
+        args: {
+          roomId: appsync.GraphqlType.id({ isRequired: true }),
+        },
+        requestMappingTemplate: appsync.MappingTemplate.fromString(
+          f(`
+            { "version": "2017-02-28",
+              "operation": "UpdateItem",
+              "key": {
+                "roomId": $util.dynamodb.toDynamoDBJson($ctx.args.roomId),
+              },
+              "update" : {
+                "expression" : "SET point = :init",
+                "expressionValues" : {
+                  ":init" : {"N": "0"}
+                }
+              }
+            }
+          `)
+        ),
+        responseMappingTemplate: appsync.MappingTemplate.dynamoDbResultItem(),
+      })
+    );
+
     this.api.addSubscription(
       "roomUpdated",
       new appsync.ResolvableField({
@@ -123,7 +123,7 @@ export class AppSyncConstruct extends Construct {
         args: {
           roomId: appsync.GraphqlType.id({ isRequired: true }),
         },
-        directives: [appsync.Directive.subscribe("incPoint")],
+        directives: [appsync.Directive.subscribe("incPoint", "resetPoint")],
         requestMappingTemplate: appsync.MappingTemplate.dynamoDbGetItem(
           "roomId",
           "roomId"
@@ -154,61 +154,28 @@ export class AppSyncConstruct extends Construct {
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
-    // const roomCreationHandler = new aws_lambda_nodejs.NodejsFunction(
-    //   this,
-    //   "roomCreationHandler",
-    //   {
-    //     entry: `${__dirname}/../../../functions/src/roomCreationHandler.ts`,
-    //     runtime: aws_lambda.Runtime.NODEJS_14_X,
-    //     environment: {
-    //       ROOM_TABLE_NAME: roomTable.tableName,
-    //       JUDGE_TABLE_NAME: judgeTable.tableName,
-    //     },
-    //     architecture: aws_lambda.Architecture.ARM_64,
-    //   }
-    // );
-    // roomTable.grantWriteData(roomCreationHandler);
-    // judgeTable.grantWriteData(roomCreationHandler);
-
     const roomDS = this.api.addDynamoDbDataSource("roomDS", roomTable);
     const judgeDS = this.api.addDynamoDbDataSource("judgeDS", judgeTable);
-    // const roomCreationDS = this.api.addLambdaDataSource(
-    //   "roomCreationDS",
-    //   roomCreationHandler
-    // );
 
     return { roomDS, judgeDS };
   }
 
   private createTypes() {
-    // const node = this.api.addType(
-    //   new appsync.InterfaceType("Node", {
-    //     definition: {
-    //       createdAt: appsync.GraphqlType.awsTimestamp({ isRequired: true }),
-    //       editedAt: appsync.GraphqlType.awsTimestamp({ isRequired: true }),
-    //     },
-    //   })
-    // );
-
     const judge = this.api.addType(
       new appsync.ObjectType("Judge", {
-        // interfaceTypes: [node],
         definition: {
           roomId: appsync.GraphqlType.id({ isRequired: true }),
           judgeId: appsync.GraphqlType.id({ isRequired: true }),
-          // point: appsync.GraphqlType.int({ isRequired: true }),
         },
       })
     );
 
     const room = this.api.addType(
       new appsync.ObjectType("Room", {
-        // interfaceTypes: [node],
         definition: {
           roomId: appsync.GraphqlType.id({ isRequired: true }),
           name: appsync.GraphqlType.string({ isRequired: true }),
           point: appsync.GraphqlType.int({ isRequired: true }),
-          // judges: judge.attribute({ isRequiredList: true }),
         },
       })
     );
