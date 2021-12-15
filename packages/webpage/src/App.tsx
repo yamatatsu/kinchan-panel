@@ -120,14 +120,12 @@ class PanelManager {
   private readonly sound: Sound;
   private readonly panel: Panel;
 
-  private count: number;
   private failTimerInstance: number | undefined;
 
   constructor(
     context: CanvasRenderingContext2D,
     contextFrameAnim: CanvasRenderingContext2D
   ) {
-    this.count = 0;
     this.sound = new Sound(se, DEFAULT_SE_VOLUME);
     this.panel = new Panel(imgs, context, contextFrameAnim);
   }
@@ -135,7 +133,6 @@ class PanelManager {
   reset() {
     this.sound.reset();
     this.panel.reset();
-    this.count = 0;
     clearTimeout(this.failTimerInstance);
   }
 
@@ -143,27 +140,26 @@ class PanelManager {
     this.sound.changeVolume(volume);
   }
 
-  setCount(_count: number) {
-    if (_count === 0) {
+  setCount(count: number) {
+    if (count === 0) {
       this.reset();
       return;
     }
-    this.count = _count;
 
     // サウンド再生
-    this.sound.playCountUp(this.count);
+    this.sound.playCountUp(count);
 
     // 画像配置
-    this.panel.drawCount(this.count);
+    this.panel.drawCount(count);
 
     // 15点以上で合格サウンド
-    if (this.count == 15) {
+    if (count == 15) {
       this.sound.playCongrats();
       this.panel.playFrameAnim();
     }
 
     clearTimeout(this.failTimerInstance);
-    if (this.count < 15) {
+    if (count < 15) {
       this.failTimerInstance = window.setTimeout(() => {
         // 残念サウンド
         this.sound.playFailure();
